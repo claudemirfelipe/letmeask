@@ -29,22 +29,28 @@ export function Home() {
     event.preventDefault();
 
     if (roomCode.trim() === '') {
+      toast.error('Informe o código da sala ou crie uma nova sala.')
       return;
     }
 
     const roomRef = await database.ref(`rooms/${roomCode}`).get();
 
     if (!roomRef.exists()) {
-      toast.error('Room does not exists.')
+      toast.error('Sala não existe.')
       return;
     }
 
     if (roomRef.val().endedAt) {
-      toast.error('Room already closed.');
+      toast.error('Sala está fechada.');
       return;
     }
 
-    history.push(`/rooms/${roomCode}`);
+    if (roomRef.val().authorId === user?.id) {
+      history.push(`/admin/rooms/${roomCode}`);
+    } else {
+      history.push(`/rooms/${roomCode}`);
+    }
+
   }
 
   return(

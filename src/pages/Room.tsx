@@ -19,20 +19,28 @@ type RoomParams = {
 
 export function Room() {
   const history = useHistory();
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const params = useParams<RoomParams>();
   const [newQuestion, setNewQuestion] = useState('');
   const roomId = params.id;
   
   const { title, questions } = useRoom(roomId)
+
+
+  async function loginGoogle() {
+    if (!user) {
+      await signInWithGoogle()
+    }
+  }
  
   async function handleSendQuestion(event: FormEvent) {
   event.preventDefault();
+    
+    if (!user) {
+      return;
+    }
     if (newQuestion.trim() === '') {
       return toast.error('Formulário está em Branco');
-    }
-    if (!user) {
-      return toast.error('Usuário não autenticado');;
     }
   
   const question = {
@@ -79,7 +87,7 @@ export function Room() {
       <main>
         <div className='room-title'>
           <h1>Sala {title}</h1>
-          { questions.length < 0 && <span>{questions} perguntas</span> }
+          { questions.length > 0 && <span>{questions.length} perguntas</span> }
         </div>  
         <form onSubmit={handleSendQuestion}>
             
@@ -95,7 +103,7 @@ export function Room() {
               <span>{user.name}</span>
             </div>
             ) : (
-            <span>Para enviar uma pergunta, <button>faça seu login.</button></span>
+            <span>Para enviar uma pergunta, <button onClick={loginGoogle}>faça seu login.</button></span>
             )}
             <Button type="submit" disabled={!user}>Enviar pergunta</Button>
           </div>
